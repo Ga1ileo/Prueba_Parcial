@@ -1,0 +1,94 @@
+@page "/ConsultaPedido"
+
+@using Prueba_Parcial.Models
+@using Prueba_Parcial.BLL
+@using Prueba_Parcial.DAL
+
+@inject IToastService toast
+
+<div class="card">
+
+        <div class="card-header">
+            <h3>Consulta de Pedidos</h3>
+        </div>
+        
+        <div class="card-body">
+            <div class="form-group">
+                <div class="form-row">
+                    <div class="input-group">
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="0" @bind="filtro" id="defaultCheck1">
+                                <label class="form-check-label" for="defaultCheck1">Filtrar por todos</label>
+                            </div>
+
+                            <div class="input-group mb-3">
+                                <select class="form-control" @bind="filtro">
+                                    <option value="0">Todos</option>
+                                </select>
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" @onclick="ConsultarPedidos">Buscar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="table">
+            <thead class="thead-light">
+            <tr>
+                <th>PedidoId</th>
+                <th>Fecha</th>
+                <th>AritucloId</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in lista)
+            {
+                <tr>
+                    <td>@item.PedidoId</td>
+                    <td>@item.Fecha</td>
+                    <td>@item.ArticuloId</td>
+                    <td>@item.Precio</td>
+                    <td>@item.Cantidad</td>
+                    <td>@item.Total</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+</div>
+
+@code {
+    
+    public int filtro { get; set; } 
+    public string criterio { get; set; } 
+
+    public decimal total { get; set; }
+    
+    public List<Pedido> lista = new List<Pedido>();
+
+
+    private void ConsultarPedidos()
+    {
+        try
+        {
+            switch (filtro)
+            {
+                case 0: 
+                    this.lista = PedidoBLL.GetList(p => true);
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+}
+

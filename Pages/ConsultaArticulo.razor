@@ -1,0 +1,183 @@
+@page "/ConsultaArticulo"
+
+@using Prueba_Parcial.Models
+@using Prueba_Parcial.BLL
+@using Prueba_Parcial.DAL
+
+@inject IToastService toast
+
+
+<div class="col-6">
+    <h6>Numero de Pedidos: @NumeroPedido</h6> 
+</div>
+
+
+<div class="card">
+
+        <div class="card-header">
+            <h3>Consulta de Articulos</h3>
+        </div>
+        
+        <div class="card-body">
+            <div class="form-group">
+                <div class="form-row">
+                    <div class="input-group">
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="0" @bind="filtro" id="defaultCheck1">
+                                <label class="form-check-label" for="defaultCheck1">Filtrar por departamentos</label>
+                            </div>
+
+                            <div class="input-group mb-3">
+                                <select class="form-control" @bind="filtro">
+                                    <option value="0">Tecnologia</option>
+                                    <option value="1">Ferreteria</option>
+                                </select>
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" @onclick="ConsultarDepartamentos">V</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <h5>Filtrar por Descripción</h5>
+                            @* <select class="form-control" @bind="filtro">
+                                        <option value="0">Descripcion</option>
+                                    </select> *@
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" placeholder="Escribir Descripcion" @bind="criterioDescripcion"/>
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" @onclick="ConsultarDescripcion">Buscar</button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="table" Model="Pedido">
+            <thead class="thead-light">
+            <tr>
+                <th>ArticuloId</th>
+                <th>Referencia</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Existencia</th>
+                <th>Cantidad</th>
+                <th> </th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in lista)
+            {
+                <tr>
+                    <td>@item.ArticuloId</td>
+                    <td>@item.Referencia</td>
+                    <td>@item.Descripcion</td>
+                    <td>@item.Precio</td>
+                    <td>@item.Existencia</td>
+                    <td><input type="number" class="form-control" placeholder="Cantidad"/></td>
+                    <td><button type="submit" class="btn btn-lg btn-success" @onclick="Pedir">Pedir</button></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+</div>
+
+@code {
+    Articulo articulo = new Articulo();
+    public int filtro { get; set; }   //departamento
+    public string criterio { get; set; } //departamento
+    
+    public int filtroDescripcion { get; set; }   //Descripcion
+    public string criterioDescripcion { get; set; } //Descripcion
+    
+    public decimal cantidad { get; set; }
+    
+    public List<Articulo> lista = new List<Articulo>();
+    
+    //Pedidos
+    Pedido pedido = new Pedido();
+    [Parameter]
+    public int PedidoId { get; set; }
+    private List<Pedido> listaPedido = new List<Pedido>();
+
+
+    protected override void OnInitialized()
+    {
+        Nuevo();
+    }
+
+    private void Nuevo()
+    {
+        this.pedido = new Pedido();
+    }
+
+    //Metodo que pide un Articulo
+    private void Pedir()
+    {
+        bool paso;
+        paso = PedidoBLL.Guardar(pedido);
+
+        if (paso)
+        {
+            Nuevo();
+            NumeroDePedido();
+            Console.WriteLine("Guardado Correctamente");
+        }
+        else
+        {
+            Console.WriteLine("No fue posible guardar");
+        }
+    }
+
+
+    private void ConsultarDepartamentos()
+    {
+        try
+        {
+            switch (filtro)
+            {
+                case 0: //Departamentos
+                    this.lista = ArticuloBLL.GetList(p => p.DepartamentoId == 1);
+                    break;
+                case 1: //Todos
+                    this.lista = ArticuloBLL.GetList(p => p.DepartamentoId == 2);
+                break;
+            }
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private void ConsultarDescripcion()
+    {
+        try
+        {
+            switch (filtroDescripcion)
+            {
+                case 0: //Descripcion
+                    this.lista = ArticuloBLL.GetList(p => p.Descripcion == criterioDescripcion);
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+    
+    private int NumeroPedido = 0;
+
+    private void NumeroDePedido()
+    {
+        NumeroPedido++;
+    }
+}
